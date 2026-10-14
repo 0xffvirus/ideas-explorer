@@ -1,0 +1,2020 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Idea Forge API",
+    "version": "0.1.0",
+    "description": "Contract snapshot authored from SPEC-idea-core.md, SPEC-agent-pipeline.md, SPEC-reports.md and SPEC-web-app.md. Regenerate the TS client with `pnpm gen:api` (point OPENAPI_URL at a live backend to diff). snake_case JSON. Endpoints marked x-assumed are not defined by a module spec yet and need backend sign-off (see docs/API-CONTRACT-NOTES.md)."
+  },
+  "servers": [
+    {
+      "url": "{baseUrl}",
+      "variables": {
+        "baseUrl": {
+          "default": "http://localhost:8000"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/ideas": {
+      "post": {
+        "operationId": "createIdea",
+        "summary": "Create an idea and optionally enqueue analysis",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIdeaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdeaDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listIdeas",
+        "summary": "List or search ideas (hybrid by default)",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SearchMode"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/IdeaStatus"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Verdict"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Sort"
+            }
+          },
+          {
+            "name": "min_score",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "max_score",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "pinned",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdeaList"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/ideas/{id}": {
+      "get": {
+        "operationId": "getIdea",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdeaId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdeaDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateIdea",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdeaId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIdeaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdeaDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/ideas/{id}/versions": {
+      "post": {
+        "operationId": "createIdeaVersion",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdeaId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVersionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdeaDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/ideas/{id}/similar": {
+      "get": {
+        "operationId": "getSimilarIdeas",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdeaId"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdeaList"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/ideas/{id}/report": {
+      "get": {
+        "operationId": "getIdeaReport",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdeaId"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/ideas/{id}/report.md": {
+      "get": {
+        "operationId": "getIdeaReportMarkdown",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdeaId"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Markdown report",
+            "content": {
+              "text/markdown": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/ideas/{id}/report.pdf": {
+      "get": {
+        "operationId": "getIdeaReportPdf",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdeaId"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF report",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "operationId": "listTags",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compare": {
+      "get": {
+        "operationId": "compareIdeas",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of 2-3 idea ids"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/runs/{id}/steps/{step}/rerun": {
+      "post": {
+        "operationId": "rerunRunStep",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "step",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RunStepName"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/runs/{id}/respond": {
+      "post": {
+        "operationId": "respondToRun",
+        "x-assumed": true,
+        "summary": "Answer or skip clarifying questions (assumed; see docs/API-CONTRACT-NOTES.md)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/runs/{id}/events": {
+      "get": {
+        "operationId": "streamRunEvents",
+        "summary": "Server-Sent Events for a run; resumable with Last-Event-ID or ?last_event_id=",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "last_event_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SSE stream of RunEvent",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunEvent"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "IdeaId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "responses": {
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": ["detail"],
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "required": ["detail"],
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["loc", "msg"],
+              "properties": {
+                "loc": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                },
+                "msg": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "IdeaStatus": {
+        "type": "string",
+        "enum": ["draft", "queued", "analyzing", "done", "failed"]
+      },
+      "Verdict": {
+        "type": "string",
+        "enum": ["pursue", "refine", "park"]
+      },
+      "SearchMode": {
+        "type": "string",
+        "enum": ["hybrid", "keyword", "semantic"]
+      },
+      "Sort": {
+        "type": "string",
+        "enum": ["recent", "score", "title"]
+      },
+      "RunStatus": {
+        "type": "string",
+        "enum": ["queued", "running", "awaiting_input", "done", "failed", "partial"]
+      },
+      "RunStepName": {
+        "type": "string",
+        "enum": [
+          "refine",
+          "clarify",
+          "market",
+          "competitors",
+          "customers",
+          "feasibility",
+          "business_model",
+          "critic"
+        ]
+      },
+      "StepStatus": {
+        "type": "string",
+        "enum": ["pending", "running", "done", "failed", "skipped"]
+      },
+      "Tag": {
+        "type": "object",
+        "required": ["name", "count"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "TagsResponse": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          }
+        }
+      },
+      "IdeaContext": {
+        "type": "object",
+        "properties": {
+          "target_region": {
+            "type": "string"
+          },
+          "audience_hint": {
+            "type": "string"
+          },
+          "budget_hint": {
+            "type": "string"
+          }
+        }
+      },
+      "IdeaBrief": {
+        "type": "object",
+        "required": [
+          "title",
+          "one_liner",
+          "problem",
+          "solution",
+          "target_users",
+          "value_prop",
+          "key_assumptions"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "one_liner": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "solution": {
+            "type": "string"
+          },
+          "target_users": {
+            "type": "string"
+          },
+          "value_prop": {
+            "type": "string"
+          },
+          "key_assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "variants": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "required": ["title", "description"],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "IdeaVersionSummary": {
+        "type": "object",
+        "required": ["id", "idea_id", "number", "raw_input", "created_at"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "idea_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "raw_input": {
+            "type": "string"
+          },
+          "context": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IdeaContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "brief": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IdeaBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RunStep": {
+        "type": "object",
+        "required": ["step", "status", "cost_usd", "attempts"],
+        "properties": {
+          "step": {
+            "$ref": "#/components/schemas/RunStepName"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "cost_usd": {
+            "type": "number"
+          },
+          "model": {
+            "type": ["string", "null"]
+          },
+          "attempts": {
+            "type": "integer"
+          },
+          "error": {
+            "type": ["string", "null"]
+          },
+          "started_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        }
+      },
+      "ClarifyingQuestion": {
+        "type": "object",
+        "required": ["id", "question"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "help": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "Run": {
+        "type": "object",
+        "required": [
+          "id",
+          "idea_id",
+          "idea_version_id",
+          "status",
+          "cost_usd",
+          "cost_cap_usd",
+          "created_at",
+          "steps",
+          "questions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "idea_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "idea_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RunStatus"
+          },
+          "step": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RunStepName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cost_usd": {
+            "type": "number"
+          },
+          "cost_cap_usd": {
+            "type": "number"
+          },
+          "error": {
+            "type": ["string", "null"]
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RunStep"
+            }
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClarifyingQuestion"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "started_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        }
+      },
+      "IdeaSummary": {
+        "type": "object",
+        "required": ["id", "title", "status", "pinned", "created_at", "updated_at", "tags"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/IdeaStatus"
+          },
+          "verdict": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Verdict"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "category": {
+            "type": ["string", "null"]
+          },
+          "overall_score": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "one_liner": {
+            "type": ["string", "null"]
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "archived_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IdeaDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IdeaSummary"
+          },
+          {
+            "type": "object",
+            "required": ["versions"],
+            "properties": {
+              "versions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/IdeaVersionSummary"
+                }
+              },
+              "latest_version": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/IdeaVersionSummary"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "latest_run": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Run"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "IdeaList": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdeaSummary"
+            }
+          },
+          "next_cursor": {
+            "type": ["string", "null"]
+          },
+          "mode": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SearchMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "CreateIdeaRequest": {
+        "type": "object",
+        "required": ["raw_input"],
+        "properties": {
+          "raw_input": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "context": {
+            "$ref": "#/components/schemas/IdeaContext"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "maxItems": 10
+          },
+          "analyze": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "UpdateIdeaRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "maxItems": 10
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "archived": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateVersionRequest": {
+        "type": "object",
+        "required": ["raw_input"],
+        "properties": {
+          "raw_input": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          },
+          "context": {
+            "$ref": "#/components/schemas/IdeaContext"
+          },
+          "analyze": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "RespondRunRequest": {
+        "type": "object",
+        "properties": {
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["question_id", "answer"],
+              "properties": {
+                "question_id": {
+                  "type": "string"
+                },
+                "answer": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "skip": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "Claim": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "source_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "verified": {
+            "type": ["boolean", "null"]
+          },
+          "confidence": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "Metric": {
+        "type": "object",
+        "required": ["value", "method", "source_urls"],
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "source_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "verified": {
+            "type": ["boolean", "null"]
+          }
+        }
+      },
+      "MarketSection": {
+        "type": "object",
+        "properties": {
+          "tam": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Metric"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sam": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Metric"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "som": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Metric"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trends": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Claim"
+            }
+          },
+          "timing_why_now": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Claim"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": ["trends"]
+      },
+      "Competitor": {
+        "type": "object",
+        "required": ["name", "positioning"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "positioning": {
+            "type": "string"
+          },
+          "pricing": {
+            "type": ["string", "null"]
+          },
+          "gap": {
+            "type": ["string", "null"]
+          },
+          "source_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "verified": {
+            "type": ["boolean", "null"]
+          }
+        }
+      },
+      "CompetitorSection": {
+        "type": "object",
+        "properties": {
+          "competitors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Competitor"
+            }
+          },
+          "differentiation": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Claim"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": ["competitors"]
+      },
+      "Persona": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "source_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "verified": {
+            "type": ["boolean", "null"]
+          }
+        }
+      },
+      "Community": {
+        "type": "object",
+        "required": ["name", "url"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "PainQuote": {
+        "type": "object",
+        "required": ["text", "url"],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "CompanyLead": {
+        "type": "object",
+        "required": ["name", "domain", "why_fit", "url"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "industry": {
+            "type": ["string", "null"]
+          },
+          "size_band": {
+            "type": ["string", "null"]
+          },
+          "country": {
+            "type": ["string", "null"]
+          },
+          "why_fit": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "CustomerSection": {
+        "type": "object",
+        "properties": {
+          "personas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Persona"
+            }
+          },
+          "communities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Community"
+            }
+          },
+          "pain_quotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PainQuote"
+            }
+          },
+          "early_adopter_profile": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Claim"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "leads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompanyLead"
+            }
+          }
+        },
+        "required": ["personas", "communities", "pain_quotes"]
+      },
+      "Risk": {
+        "type": "object",
+        "required": ["risk", "likelihood", "impact", "mitigation"],
+        "properties": {
+          "risk": {
+            "type": "string"
+          },
+          "likelihood": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "impact": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "mitigation": {
+            "type": "string"
+          }
+        }
+      },
+      "FeasibilitySection": {
+        "type": "object",
+        "properties": {
+          "technical": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Claim"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "operational": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Claim"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "legal_regulatory": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Claim"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mvp_cost_range": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Claim"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mvp_timeline": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Claim"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "risks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Risk"
+            }
+          }
+        },
+        "required": ["risks"]
+      },
+      "LeanCanvas": {
+        "type": "object",
+        "properties": {
+          "problem": {
+            "type": ["string", "null"]
+          },
+          "solution": {
+            "type": ["string", "null"]
+          },
+          "key_metrics": {
+            "type": ["string", "null"]
+          },
+          "unique_value": {
+            "type": ["string", "null"]
+          },
+          "unfair_advantage": {
+            "type": ["string", "null"]
+          },
+          "channels": {
+            "type": ["string", "null"]
+          },
+          "customer_segments": {
+            "type": ["string", "null"]
+          },
+          "cost_structure": {
+            "type": ["string", "null"]
+          },
+          "revenue_streams": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "PricingOption": {
+        "type": "object",
+        "required": ["name", "price"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "notes": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "BusinessModelSection": {
+        "type": "object",
+        "properties": {
+          "lean_canvas": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LeanCanvas"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revenue_streams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Claim"
+            }
+          },
+          "pricing_options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingOption"
+            }
+          },
+          "unit_economics": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "cac": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/Claim"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "ltv": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/Claim"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "assumptions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["assumptions"]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "go_to_market": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Claim"
+            }
+          }
+        },
+        "required": ["revenue_streams", "pricing_options", "go_to_market"]
+      },
+      "DimensionId": {
+        "type": "string",
+        "enum": [
+          "problem_severity",
+          "market_evidence",
+          "competition_intensity",
+          "customer_reachability",
+          "feasibility",
+          "monetization_clarity"
+        ]
+      },
+      "DimensionScore": {
+        "type": "object",
+        "required": ["id", "label", "score", "confidence", "needs_review", "not_scored"],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/DimensionId"
+          },
+          "label": {
+            "type": "string"
+          },
+          "score": {
+            "type": ["number", "null"],
+            "minimum": 1,
+            "maximum": 5
+          },
+          "confidence": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "needs_review": {
+            "type": "boolean"
+          },
+          "not_scored": {
+            "type": "boolean"
+          },
+          "rationale": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "Source": {
+        "type": "object",
+        "required": ["number", "url", "title"],
+        "properties": {
+          "number": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "NextStep": {
+        "type": "object",
+        "required": ["assumption", "test"],
+        "properties": {
+          "assumption": {
+            "type": "string"
+          },
+          "test": {
+            "type": "string"
+          },
+          "risk": {
+            "type": ["string", "null"],
+            "enum": ["low", "medium", "high", null]
+          }
+        }
+      },
+      "SectionStatus": {
+        "type": "string",
+        "enum": ["pending", "running", "done", "failed", "not_completed"]
+      },
+      "Report": {
+        "type": "object",
+        "required": [
+          "idea_id",
+          "run_id",
+          "generated_at",
+          "scorecard",
+          "sources",
+          "header",
+          "next_steps"
+        ],
+        "properties": {
+          "idea_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cost_usd": {
+            "type": ["number", "null"]
+          },
+          "header": {
+            "type": "object",
+            "required": ["title", "excluded_dimensions"],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "one_liner": {
+                "type": ["string", "null"]
+              },
+              "verdict": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Verdict"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "verdict_confidence": {
+                "type": ["number", "null"],
+                "minimum": 0,
+                "maximum": 1
+              },
+              "overall_score": {
+                "type": ["number", "null"],
+                "minimum": 0,
+                "maximum": 100
+              },
+              "excluded_dimensions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DimensionId"
+                }
+              },
+              "run_date": {
+                "type": ["string", "null"],
+                "format": "date-time"
+              },
+              "cost_usd": {
+                "type": ["number", "null"]
+              },
+              "partial": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          },
+          "scorecard": {
+            "type": "object",
+            "required": ["dimensions"],
+            "properties": {
+              "dimensions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DimensionScore"
+                }
+              },
+              "overall_score": {
+                "type": ["number", "null"]
+              },
+              "excluded": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DimensionId"
+                }
+              }
+            }
+          },
+          "brief": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IdeaBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "market": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MarketSection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "competitors": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompetitorSection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "customers": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CustomerSection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "feasibility": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FeasibilitySection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "business_model": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BusinessModelSection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "next_steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NextStep"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            }
+          },
+          "sections_status": {
+            "type": "object",
+            "properties": {
+              "market": {
+                "$ref": "#/components/schemas/SectionStatus"
+              },
+              "competitors": {
+                "$ref": "#/components/schemas/SectionStatus"
+              },
+              "customers": {
+                "$ref": "#/components/schemas/SectionStatus"
+              },
+              "feasibility": {
+                "$ref": "#/components/schemas/SectionStatus"
+              },
+              "business_model": {
+                "$ref": "#/components/schemas/SectionStatus"
+              }
+            }
+          }
+        }
+      },
+      "CompareItem": {
+        "type": "object",
+        "required": ["idea"],
+        "properties": {
+          "idea": {
+            "$ref": "#/components/schemas/IdeaSummary"
+          },
+          "report": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Report"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "CompareResponse": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompareItem"
+            }
+          }
+        }
+      },
+      "RunEvent": {
+        "type": "object",
+        "required": ["id", "type", "run_id", "at"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "step_started",
+              "step_completed",
+              "step_failed",
+              "cost_update",
+              "awaiting_input",
+              "run_done"
+            ]
+          },
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "step": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RunStepName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RunStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "type": ["string", "null"]
+          },
+          "cost_usd": {
+            "type": ["number", "null"]
+          },
+          "cost_cap_usd": {
+            "type": ["number", "null"]
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClarifyingQuestion"
+            }
+          }
+        }
+      }
+    }
+  }
+}
