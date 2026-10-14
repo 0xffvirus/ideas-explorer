@@ -1,0 +1,40 @@
+{
+  "kind": "Listing",
+  "data": {
+    "children": [
+      {
+        "kind": "t3",
+        "data": {
+          "title": "Anyone else struggle to find a reliable pet sitter?",
+          "permalink": "/r/pets/comments/abc123/anyone_else_struggle/",
+          "selftext": "I travel for work &amp; finding someone trustworthy is a nightmare. Rover sitters cancel last minute...",
+          "created_utc": 1717000000.0,
+          "score": 87,
+          "subreddit": "pets"
+        }
+      },
+      {
+        "kind": "t3",
+        "data": {
+          "title": "Rover vs Wag comparison",
+          "permalink": "/r/dogs/comments/def456/rover_vs_wag/",
+          "selftext": "",
+          "created_utc": 1717100000.0,
+          "score": 12,
+          "subreddit": "dogs"
+        }
+      },
+      {
+        "kind": "t3",
+        "data": {
+          "title": "Malformed entry",
+          "permalink": "",
+          "selftext": "no permalink so it cannot be cited",
+          "created_utc": 1717200000.0,
+          "score": 400,
+          "subreddit": "pets"
+        }
+      }
+    ]
+  }
+}

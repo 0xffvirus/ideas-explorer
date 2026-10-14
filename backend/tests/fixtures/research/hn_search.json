@@ -1,0 +1,34 @@
+{
+  "hits": [
+    {
+      "title": "Ask HN: How do you find trustworthy pet sitters?",
+      "url": null,
+      "story_text": "I&#x27;ve tried Rover &amp; local Facebook groups, but consistency is the problem.",
+      "objectID": "40123456",
+      "points": 120,
+      "created_at": "2024-05-20T14:00:00Z"
+    },
+    {
+      "title": "Rover (YC W11) is hiring",
+      "url": "https://rover.com/jobs",
+      "story_text": null,
+      "objectID": "40123457",
+      "points": 3,
+      "created_at": "2024-05-21T09:30:00Z"
+    },
+    {
+      "title": null,
+      "url": null,
+      "story_text": "Sitters keep cancelling on me &amp; I can't find backups.",
+      "objectID": "40123458",
+      "points": 0,
+      "created_at": null
+    },
+    {
+      "title": null,
+      "url": null,
+      "story_text": null,
+      "objectID": "40123459"
+    }
+  ]
+}

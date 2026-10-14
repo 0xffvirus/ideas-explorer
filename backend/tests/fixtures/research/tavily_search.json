@@ -1,0 +1,27 @@
+{
+  "query": "pet sitting marketplace",
+  "response_time": 0.53,
+  "results": [
+    {
+      "title": "Pet Sitting Market Size & Growth Report",
+      "url": "https://example.com/pet-sitting-market",
+      "content": "<p>The global pet sitting market was <strong>valued at $2.4 billion in 2024</strong> &amp; is projected to grow at 8.1% CAGR.</p>",
+      "score": 0.94,
+      "published_date": "2024-06-01"
+    },
+    {
+      "title": "",
+      "url": "https://example.org/best-pet-apps",
+      "content": "Apps like Rover and Wag connect owners with sitters.",
+      "score": 1.2,
+      "published_date": ""
+    },
+    {
+      "title": "Broken result",
+      "url": "not a url",
+      "content": "should be skipped",
+      "score": 0.5,
+      "published_date": null
+    }
+  ]
+}

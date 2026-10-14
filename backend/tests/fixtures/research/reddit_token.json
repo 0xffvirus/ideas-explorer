@@ -1,0 +1,6 @@
+{
+  "access_token": "fake-token-abc",
+  "token_type": "bearer",
+  "expires_in": 3600,
+  "scope": "*"
+}
