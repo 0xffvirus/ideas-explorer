@@ -1,0 +1,31 @@
+{
+  "kind": "Listing",
+  "data": {
+    "after": null,
+    "dist": 2,
+    "children": [
+      {
+        "kind": "t3",
+        "data": {
+          "id": "abc123",
+          "title": "I can never find a reliable dog walker",
+          "permalink": "/r/dogs/comments/abc123/i_can_never_find_a_reliable_dog_walker/",
+          "selftext": "Every app I try is flaky &amp; expensive. <p>I just want someone trustworthy.</p>",
+          "created_utc": 1710000000.0,
+          "score": 75
+        }
+      },
+      {
+        "kind": "t3",
+        "data": {
+          "id": "def456",
+          "title": "What do you use to track vet appointments?",
+          "permalink": "/r/dogs/comments/def456/what_do_you_use_to_track_vet_appointments/",
+          "selftext": "",
+          "created_utc": 1710086400.0,
+          "score": 3
+        }
+      }
+    ]
+  }
+}

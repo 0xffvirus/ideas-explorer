@@ -1,0 +1,25 @@
+{
+  "query": "pet care market size",
+  "results": [
+    {
+      "title": "Pet Care Market Size, Share & Trends Analysis",
+      "url": "https://www.grandviewresearch.com/industry-analysis/pet-care-market",
+      "content": "<b>Pet care</b> market size was estimated at USD 246.66 billion in 2023 &amp; is expected to grow at a CAGR of 6.1% from 2024 to 2030. &nbsp; Source: Grand View Research.",
+      "score": 0.94,
+      "published_date": "2024-01-15T00:00:00Z"
+    },
+    {
+      "title": "US pet industry spending 2023",
+      "url": "https://www.americanpetproducts.org/press_industrytrends.asp",
+      "content": "Americans spent $147 billion on their pets in 2023, up from the prior year.",
+      "score": 0.81,
+      "published_date": "Thu, 14 Mar 2024 09:30:00 GMT"
+    },
+    {
+      "title": "A result without a published date",
+      "url": "https://example.com/news/pet-care",
+      "content": "A third result without a published date.",
+      "score": 0.55
+    }
+  ]
+}

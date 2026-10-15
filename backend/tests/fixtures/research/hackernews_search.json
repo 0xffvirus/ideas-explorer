@@ -1,0 +1,20 @@
+{
+  "hits": [
+    {
+      "objectID": "39000001",
+      "title": "Show HN: I built a dog walking scheduler",
+      "url": "https://example.com/show-hn-dog-walker",
+      "story_text": "We got tired of spreadsheets &amp; built <i>this</i>.",
+      "created_at": "2024-02-01T15:00:00.000Z",
+      "points": 150
+    },
+    {
+      "objectID": "39000002",
+      "title": "Ask HN: How do you vet pet sitters?",
+      "url": null,
+      "story_text": null,
+      "created_at": "2024-02-02T09:30:00.000Z",
+      "points": 45
+    }
+  ]
+}

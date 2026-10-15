@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ report.header.title }} - Idea Forge report</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: "Helvetica Neue", Arial, sans-serif; color: #1a1a1a; margin: 0; padding: 2rem; line-height: 1.5; }
+    h1 { font-size: 1.75rem; margin: 0 0 0.25rem; }
+    h2 { font-size: 1.3rem; margin: 2rem 0 0.5rem; border-bottom: 1px solid #ddd; padding-bottom: 0.25rem; }
+    h3 { font-size: 1rem; margin: 1.25rem 0 0.375rem; }
+    a { color: #1a4f8a; text-decoration: none; }
+    .one-liner { font-style: italic; color: #555; margin: 0 0 0.75rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; font-size: 0.9rem; }
+    .badge { display: inline-block; border: 1px solid #ccc; border-radius: 999px; padding: 0.1rem 0.65rem; background: #f7f7f7; }
+    .badge.low-confidence { border-style: dashed; background: #fdf3dd; }
+    .badge.partial { background: #fdf3dd; }
+    .score-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0.75rem 0 0; }
+    .score-card { flex: 1 1 10rem; min-width: 10rem; border: 1px solid #ccc; border-radius: 8px; padding: 0.6rem 0.75rem; }
+    .score-card.low-confidence { border-style: dashed; }
+    .score-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: #555; }
+    .score-value { font-size: 1.3rem; font-weight: 700; }
+    .score-value .uncertain { color: #a15c00; }
+    .score-meta { font-size: 0.8rem; color: #666; }
+    .rationale { font-size: 0.85rem; color: #444; margin-top: 0.25rem; }
+    .not-scored { color: #777; font-weight: 400; font-size: 0.95rem; }
+    table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    th, td { border: 1px solid #ddd; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+    th { background: #f5f5f5; }
+    ul, ol { margin: 0.25rem 0 0.5rem 1.25rem; padding: 0; }
+    li { margin: 0.15rem 0; }
+    .claims { list-style: none; margin-left: 0; }
+    .citation { color: #555; font-size: 0.8rem; }
+    .pill { display: inline-block; margin-left: 0.35rem; padding: 0.05rem 0.5rem; border: 1px solid #d9a441; border-radius: 999px; background: #fdf3dd; color: #7a4c00; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    .not-completed { color: #777; font-style: italic; }
+    .sources li { margin-bottom: 0.2rem; }
+    footer { margin-top: 2.5rem; padding-top: 0.75rem; border-top: 1px solid #ddd; font-size: 0.8rem; color: #666; }
+    @media print {
+      body { padding: 0; }
+      .score-card, .badge, .pill { print-color-adjust: exact; }
+      a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+{% macro citation_suffix(claim) %}{% for number in claim.citation_numbers %} <span class="citation">[{{ number }}]</span>{% endfor %}{% endmacro %}
+{% macro unverified_pill(claim) %}{% if claim.status != "verified" %}<span class="pill unverified">{{ "unverified: source unavailable" if claim.status == "unavailable" else "unverified" }}</span>{% endif %}{% endmacro %}
+{% macro claim_item(claim) %}<li>{{ claim.text }}{{ citation_suffix(claim) }}{{ unverified_pill(claim) }}</li>{% endmacro %}
+{% macro source_links(urls) %}{% for url in urls %} <a href="{{ url }}">[source]</a>{% endfor %}{% endmacro %}
+{% macro claims_block(claims) %}{% if claims %}
+  <h3>Claims</h3>
+  <ul class="claims">{% for claim in claims %}{{ claim_item(claim) }}{% endfor %}</ul>
+  {% endif %}{% endmacro %}
+
+  <header>
+    <h1>{{ report.header.title }}</h1>
+    <p class="one-liner">{{ report.header.one_liner }}</p>
+    {% set verdict_low = report.header.verdict_confidence is not none and report.header.verdict_confidence < confidence_floor %}
+    <p class="meta">
+      <span class="badge{% if verdict_low %} low-confidence{% endif %}">Verdict: {{ verdict_text }}{% if verdict_low %} ?{% endif %}</span>
+      <span class="badge{% if report.header.score_basis == "partial" %} partial{% endif %}">Overall: {{ score_text }}</span>
+      <span class="badge">Run date: {{ run_date_text }}</span>
+      <span class="badge">Cost: {{ cost_text }}</span>
+      {% if report.is_partial %}<span class="badge partial">Partial run</span>{% endif %}
+    </p>
+  </header>
+
+  <h2>Scorecard</h2>
+  <div class="score-grid">
+    {% for entry in report.scorecard %}
+    <div class="score-card{% if entry.needs_review %} low-confidence{% endif %}">
+      <div class="score-label">{{ entry.label }}</div>
+      {% if entry.score is not none %}
+      <div class="score-value">{{ "%.1f" | format(entry.score) }}/5{% if entry.needs_review %} <span class="uncertain">?</span>{% endif %}</div>
+      {% else %}
+      <div class="score-value not-scored">not scored</div>
+      {% endif %}
+      <div class="score-meta">
+        {%- if entry.confidence is not none %}confidence {{ (entry.confidence * 100) | round(0) | int }}%{% endif %}
+        {%- if entry.source != "jev" %} &middot; Jev unavailable{% endif %}
+      </div>
+      {% if entry.rationale %}<div class="rationale">{{ entry.rationale }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2>Polished idea</h2>
+  <p><strong>Problem:</strong> {{ report.brief.problem }}</p>
+  <p><strong>Solution:</strong> {{ report.brief.solution }}</p>
+  <p><strong>Target users:</strong> {{ report.brief.target_users }}</p>
+  <p><strong>Value proposition:</strong> {{ report.brief.value_prop }}</p>
+  {% if report.brief.key_assumptions %}
+  <h3>Key assumptions</h3>
+  <ul>{% for item in report.brief.key_assumptions %}<li>{{ item }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if report.brief.variants %}
+  <h3>Variants</h3>
+  <ul>{% for item in report.brief.variants %}<li>{{ item }}</li>{% endfor %}</ul>
+  {% endif %}
+  {{ claims_block(report.brief.claims) }}
+
+  {% for section in report.sections %}
+  {% if section.status == "complete" %}
+  {% set payload = section.json_payload %}
+  {% if section.name == "market" %}
+  <h2>{{ section.title }}</h2>
+  <ul>
+    <li><strong>TAM:</strong> {{ payload["tam"]["value"] }} &mdash; {{ payload["tam"]["method"] }}{{ source_links(payload["tam"]["sources"]) }}</li>
+    <li><strong>SAM:</strong> {{ payload["sam"]["value"] }} &mdash; {{ payload["sam"]["method"] }}{{ source_links(payload["sam"]["sources"]) }}</li>
+    <li><strong>SOM:</strong> {{ payload["som"]["value"] }} &mdash; {{ payload["som"]["method"] }}{{ source_links(payload["som"]["sources"]) }}</li>
+  </ul>
+  {% if payload["trends"] %}
+  <h3>Trends</h3>
+  <ul>{% for trend in payload["trends"] %}<li>{{ trend["text"] }}{{ source_links(trend["source_urls"]) }}</li>{% endfor %}</ul>
+  {% endif %}
+  <h3>Why now</h3>
+  <p>{{ payload["timing_why_now"]["text"] }}{{ source_links(payload["timing_why_now"]["source_urls"]) }}</p>
+  {{ claims_block(section.claims) }}
+  {% elif section.name == "competitors" %}
+  <h2>{{ section.title }}</h2>
+  {% if payload["competitors"] %}
+  <table>
+    <thead><tr><th>Competitor</th><th>Positioning</th><th>Pricing</th><th>Gap</th></tr></thead>
+    <tbody>
+      {% for competitor in payload["competitors"] %}
+      <tr>
+        <td><a href="{{ competitor["url"] }}">{{ competitor["name"] }}</a></td>
+        <td>{{ competitor["positioning"] }}</td>
+        <td>{{ competitor["pricing"] }}</td>
+        <td>{{ competitor["gap"] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="not-completed">No competitors found.</p>
+  {% endif %}
+  <p><strong>Differentiation:</strong> {{ payload["differentiation"]["text"] }}{{ source_links(payload["differentiation"]["source_urls"]) }}</p>
+  {{ claims_block(section.claims) }}
+  {% elif section.name == "customers" %}
+  <h2>{{ section.title }}</h2>
+  {% if payload["personas"] %}
+  <h3>Personas</h3>
+  <ul>
+    {% for persona in payload["personas"] %}
+    <li>
+      <strong>{{ persona["name"] }}</strong> &mdash; {{ persona["description"] }}
+      {% if persona["pains"] %}<ul>{% for pain in persona["pains"] %}<li>Pain: {{ pain }}</li>{% endfor %}</ul>{% endif %}
+      {% if persona["where_they_gather"] %}<ul>{% for place in persona["where_they_gather"] %}<li>Gathers in: {{ place }}</li>{% endfor %}</ul>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if payload["communities"] %}
+  <h3>Communities</h3>
+  <ul>
+    {% for community in payload["communities"] %}
+    <li><strong>{{ community["name"] }}</strong> &mdash; {{ community["why"] }} <a href="{{ community["url"] }}">[source]</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if payload["pain_quotes"] %}
+  <h3>Pain quotes</h3>
+  <ul>
+    {% for quote in payload["pain_quotes"] %}
+    <li>&ldquo;{{ quote["quote"] }}&rdquo; &mdash; {{ quote["context"] }} <a href="{{ quote["url"] }}">[source]</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <p><strong>Early adopters:</strong> {{ payload["early_adopter_profile"] }}</p>
+  {% if payload["leads"] %}
+  <h3>Company leads</h3>
+  <ul>
+    {% for lead in payload["leads"] %}
+    <li><strong>{{ lead["name"] }}</strong> ({{ lead["domain"] }}) &mdash; {{ lead["why_fit"] }} <a href="{{ lead["url"] }}">[source]</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {{ claims_block(section.claims) }}
+  {% elif section.name == "feasibility" %}
+  <h2>{{ section.title }}</h2>
+  <ul>
+    <li><strong>Technical:</strong> {{ payload["technical"] }}</li>
+    <li><strong>Operational:</strong> {{ payload["operational"] }}</li>
+    <li><strong>Legal / regulatory:</strong> {{ payload["legal_regulatory"] }}</li>
+    <li><strong>MVP cost:</strong> {{ payload["mvp_cost_range"] }}</li>
+    <li><strong>MVP timeline:</strong> {{ payload["mvp_timeline"] }}</li>
+  </ul>
+  {% if payload["risks"] %}
+  <h3>Risks</h3>
+  <table>
+    <thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      {% for risk in payload["risks"] %}
+      <tr><td>{{ risk["description"] }}</td><td>{{ risk["likelihood"] }}/5</td><td>{{ risk["impact"] }}/5</td><td>{{ risk["mitigation"] }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {{ claims_block(section.claims) }}
+  {% else %}
+  <h2>{{ section.title }}</h2>
+  {% if payload["lean_canvas"] %}
+  <h3>Lean canvas</h3>
+  <table>
+    <thead><tr><th>Block</th><th>Value</th></tr></thead>
+    <tbody>{% for block, value in payload["lean_canvas"].items() %}<tr><td>{{ block }}</td><td>{{ value }}</td></tr>{% endfor %}</tbody>
+  </table>
+  {% endif %}
+  {% if payload["revenue_streams"] %}
+  <h3>Revenue streams</h3>
+  <ul>{% for stream in payload["revenue_streams"] %}<li>{{ stream }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if payload["pricing_options"] %}
+  <h3>Pricing</h3>
+  <ul>{% for option in payload["pricing_options"] %}<li><strong>{{ option["name"] }}</strong> &mdash; {{ option["price_point"] }}: {{ option["notes"] }}</li>{% endfor %}</ul>
+  {% endif %}
+  <h3>Unit economics</h3>
+  <ul>
+    <li><strong>CAC:</strong> {{ payload["unit_economics"]["cac_estimate"] }}</li>
+    <li><strong>LTV:</strong> {{ payload["unit_economics"]["ltv_estimate"] }}</li>
+    {% for assumption in payload["unit_economics"]["assumptions"] %}<li>Assumption: {{ assumption }}</li>{% endfor %}
+  </ul>
+  {% if payload["go_to_market"] %}
+  <h3>Go to market</h3>
+  <ul>{% for channel in payload["go_to_market"] %}<li>{{ channel }}</li>{% endfor %}</ul>
+  {% endif %}
+  {{ claims_block(section.claims) }}
+  {% endif %}
+  {% else %}
+  <h2>{{ section.title }}</h2>
+  <p class="not-completed">Not completed.</p>
+  {% endif %}
+  {% endfor %}
+
+  <h2>Next steps</h2>
+  {% if report.next_steps %}
+  <ol>
+    {% for step in report.next_steps %}
+    <li><strong>{{ step.assumption }}</strong> &mdash; {{ step.test }} (cost: {{ step.cost_hint }})</li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="not-completed">No next steps were produced.</p>
+  {% endif %}
+
+  <h2>Sources</h2>
+  {% if report.sources %}
+  <ol class="sources">
+    {% for source in report.sources %}
+    <li><a href="{{ source.url }}">{{ source.title or source.url }}</a></li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="not-completed">No sources were cited.</p>
+  {% endif %}
+
+  <footer>
+    Generated {{ report.generated_at.strftime("%Y-%m-%d %H:%M UTC") }}.
+    Scores below {{ (confidence_floor * 100) | round(0) | int }}% confidence are flagged.
+  </footer>
+</body>
+</html>
