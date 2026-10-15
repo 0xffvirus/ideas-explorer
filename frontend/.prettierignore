@@ -1,0 +1,4 @@
+# Generated files
+lib/api/schema.d.ts
+openapi.json
+public/mockServiceWorker.js
